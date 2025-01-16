@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Only one datasource block is allowed
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  githubId      String    @unique
+  email         String?   @unique
+  name          String?
+  accessToken   String
+  analyses      Analysis[]
+  createdAt     DateTime  @default(now())
+}
+
+model Analysis {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  repoName    String
+  changes     Json
+  status      AnalysisStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+}
+
+enum AnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
